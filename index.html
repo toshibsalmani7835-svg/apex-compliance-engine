@@ -3,121 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Compliance Engine | Enterprise Dashboard</title>
+    <title>Apex Compliance Engine - B2B Vendor Onboarding</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg shadow-lg tracking-wider text-sm">APEX</div>
-            <div>
-                <h1 class="font-bold text-lg leading-tight tracking-wide">Compliance Engine</h1>
-                <p class="text-xs text-slate-400">Enterprise B2B Vendor Onboarding</p>
+    <!-- Header Section -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded text-sm tracking-wide">APEX</span>
+                <h1 class="text-lg font-semibold tracking-wide">Compliance Engine</h1>
             </div>
-        </div>
-        <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-xs font-medium text-emerald-400">System Online</span>
+            <div class="flex items-center space-x-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs text-slate-400 font-medium">System Online</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-4xl mx-auto px-4 py-8 w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow">
         
         <!-- Form Section -->
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-            <div>
-                <h2 class="text-lg font-semibold mb-1 text-slate-200">New Vendor Assessment</h2>
-                <p class="text-xs text-slate-400 mb-6">Enter compliance credentials to run live automated risk analysis.</p>
-                
-                <form id="complianceForm" class="space-y-4">
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl mb-8">
+            <h2 class="text-xl font-medium mb-1 text-indigo-300">New Vendor Assessment</h2>
+            <p class="text-xs text-slate-400 mb-6">Enter compliance credentials to run live automated risk analysis.</p>
+
+            <form id="vendorForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Company Name</label>
+                    <input type="text" id="company_name" required value="Apex Solutions Pvt Ltd" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Company Name</label>
-                        <input type="text" id="company_name" required placeholder="e.g. Apex Tech Pvt Ltd" 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">GSTIN Number</label>
+                        <input type="text" id="gstin" required value="07AABCA1234F1Z5" 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
                     </div>
-
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">GSTIN Number</label>
-                        <input type="text" id="gstin" required placeholder="e.g. 07AAAAA0000A1Z5" 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">PAN Number</label>
+                        <input type="text" id="pan" required value="ABCDE1234F" 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
                     </div>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">PAN Number</label>
-                        <input type="text" id="pan" required placeholder="e.g. ABCDE1234F" 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Contact Person</label>
+                        <input type="text" id="contact_person" required value="Rahul Sharma" 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Contact Person</label>
-                            <input type="text" id="contact_person" required placeholder="Rahul Sharma" 
-                                class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Email ID</label>
-                            <input type="email" id="email" required placeholder="rahul@apextec..." 
-                                class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">API Secret Access Key</label>
-                        <input type="password" id="apiKey" required value="apex_secret_key_999" 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Email Address</label>
+                        <input type="email" id="email" required value="rahul@apexsolutions.com" 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
                     </div>
-                </form>
-            </div>
+                </div>
 
-            <button type="button" onclick="runComplianceCheck()" 
-                class="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg shadow-lg transition duration-200 text-sm tracking-wide">
-                Run Compliance & Risk Check
-            </button>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">API Secret Access Key</label>
+                    <input type="password" id="api_key" required value="apex_secret_key_999" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
+                </div>
+
+                <button type="submit" id="submitBtn" 
+                    class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg text-sm transition-all shadow-lg shadow-indigo-600/2ari0">
+                    Run Compliance & Risk Check
+                </button>
+            </form>
         </section>
 
-        <!-- Result Section -->
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-            <div>
-                <h2 class="text-lg font-semibold mb-1 text-slate-200">Assessment Report</h2>
-                <p class="text-xs text-slate-400 mb-6">Real-time risk scoring and compliance evaluation results.</p>
-                
-                <div id="reportCard" class="bg-slate-950 border border-slate-800/80 rounded-xl p-5 min-h-[280px] flex flex-col items-center justify-center text-center">
-                    <p class="text-xs text-slate-500">Submit vendor details from the form to generate a secure compliance report card.</p>
-                </div>
-            </div>
-
-            <div class="text-center pt-4 border-t border-slate-800/50">
-                <p class="text-[11px] text-slate-500">Apex Compliance Engine • Secured B2B Gateway</p>
+        <!-- Report Section -->
+        <section id="reportSection" class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hidden">
+            <h2 class="text-xl font-medium mb-4 text-indigo-300">Assessment Report</h2>
+            <div id="reportContent" class="space-y-3 text-sm">
+                <!-- Dynamic results will be injected here -->
             </div>
         </section>
 
     </main>
 
-    <!-- Scripting for API Call -->
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        Apex Compliance Engine &bull; Enterprise Secure Onboarding Framework
+    </footer>
+
+    <!-- JavaScript Handler -->
     <script>
-        async function runComplianceCheck() {
-            // ==========================================
-            // APNI BACKEND RENDER URL YAHAN DAAL DE (Bina / ke aakhiri mein)
-            // ==========================================
-            const BACKEND_URL = "https://apex-compliance-engine-1.onrender.com"; 
+        // Updated Live FastAPI Backend URL
+        const BACKEND_URL = "https://apex-compliance-engine-2.onrender.com";
 
-            const company_name = document.getElementById('company_name').value;
-            const gstin = document.getElementById('gstin').value;
-            const pan = document.getElementById('pan').value;
-            const contact_person = document.getElementById('contact_person').value;
-            const email = document.getElementById('email').value;
-            const apiKey = document.getElementById('apiKey').value;
+        document.getElementById('vendorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-            if(!company_name || !gstin || !pan) {
-                alert("Please fill in all mandatory fields.");
-                return;
-            }
+            const btn = document.getElementById('submitBtn');
+            const reportSection = document.getElementById('reportSection');
+            const reportContent = document.getElementById('reportContent');
 
-            const reportCard = document.getElementById('reportCard');
-            reportCard.innerHTML = `<p class="text-xs text-indigo-400 animate-pulse">Running secure compliance verification...</p>`;
+            btn.disabled = true;
+            btn.textContent = "Verifying & Analyzing...";
+
+            const payload = {
+                company_name: document.getElementById('company_name').value,
+                gstin: document.getElementById('gstin').value,
+                pan: document.getElementById('pan').value,
+                contact_person: document.getElementById('contact_person').value,
+                email: document.getElementById('email').value
+            };
+
+            const apiKey = document.getElementById('api_key').value;
 
             try {
                 const response = await fetch(`${BACKEND_URL}/api/v1/vendor/verify`, {
@@ -126,53 +124,49 @@
                         'Content-Type': 'application/json',
                         'access-token': apiKey
                     },
-                    body: JSON.stringify({
-                        company_name: company_name,
-                        gstin: gstin,
-                        pan: pan,
-                        contact_person: contact_person,
-                        email: email
-                    })
+                    body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
-
-                if(response.ok) {
-                    reportCard.innerHTML = `
-                        <div class="w-full text-left space-y-3">
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                                <span class="text-xs text-slate-400">Status</span>
-                                <span class="px-2 py-0.5 text-xs rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${data.status || 'Verified'}</span>
-                            </div>
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                                <span class="text-xs text-slate-400">Company</span>
-                                <span class="text-xs font-medium text-slate-200">${data.company_name}</span>
-                            </div>
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                                <span class="text-xs text-slate-400">Risk Score</span>
-                                <span class="text-xs font-bold text-indigo-400">${data.risk_score ?? 'Low'}</span>
-                            </div>
-                            <div class="pt-2">
-                                <p class="text-[11px] text-slate-400 bg-slate-900 p-2.5 rounded border border-slate-800/50">
-                                    <strong class="text-slate-300">Remarks:</strong> ${data.message || 'Vendor passed all core compliance checks successfully.'}
-                                </p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    reportCard.innerHTML = `
-                        <div class="text-red-400 text-xs space-y-2">
-                            <p class="font-semibold">Verification Failed</p>
-                            <p class="text-slate-400">${data.detail || 'Invalid credentials or unauthorized access.'}</p>
-                        </div>
-                    `;
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Server returned an error status.");
                 }
 
+                const result = await response.json();
+
+                // Style based on risk score
+                let badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if (result.risk_score === "High") badgeColor = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                if (result.risk_score === "Medium") badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+
+                reportContent.innerHTML = `
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-400">Company Name:</span>
+                        <span class="font-medium text-slate-200">${result.company_name}</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-400">Compliance Status:</span>
+                        <span class="font-semibold text-slate-100">${result.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-400">Risk Assessment Score:</span>
+                        <span class="px-2.5 py-1 rounded border text-xs font-bold ${badgeColor}">${result.risk_score} Risk</span>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-400 block mb-1">Engine Remarks:</span>
+                        <p class="text-slate-300 text-xs leading-relaxed">${result.message}</p>
+                    </div>
+                `;
+                reportSection.classList.remove('hidden');
+                reportSection.scrollIntoView({ behavior: 'smooth' });
+
             } catch (error) {
-                alert("Network Error: Could not connect to the Apex compliance backend.");
-                reportCard.innerHTML = `<p class="text-xs text-slate-500">Submit vendor details from the form to generate a secure compliance report card.</p>`;
+                alert("Network Error: Could not connect to the Apex compliance backend.\nDetails: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Run Compliance & Risk Check";
             }
-        }
+        });
     </script>
 </body>
 </html>
