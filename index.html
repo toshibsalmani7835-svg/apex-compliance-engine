@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex B2B Compliance & Vendor Onboarding Dashboard</title>
+    <!-- Tailwind CSS for modern professional look -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-lg">APEX</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Compliance Engine</h1>
+                    <p class="text-xs text-slate-400">Enterprise B2B Vendor Onboarding</p>
+                </div>
+            </div>
+            <span class="text-xs bg-emerald-900 text-emerald-300 px-3 py-1 rounded-full border border-emerald-700 font-medium">System Online</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+
+        <!-- Left Column: Vendor Onboarding Form -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
+            <h2 class="text-lg font-semibold mb-4 text-indigo-400 border-b border-slate-700 pb-2">New Vendor Assessment</h2>
+            
+            <form id="vendorForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Company Name</label>
+                    <input type="text" id="company_name" required placeholder="e.g. Apex Tech Pvt Ltd" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">GSTIN Number</label>
+                    <input type="text" id="gstin" required placeholder="e.g. 07AAAAA0000A1Z5" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">PAN Number</label>
+                    <input type="text" id="pan" required placeholder="e.g. ABCDE1234F" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Contact Person</label>
+                        <input type="text" id="contact_person" required placeholder="Rahul Sharma" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">Email ID</label>
+                        <input type="email" id="email" required placeholder="rahul@apextech.com" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1">API Secret Access Key</label>
+                    <input type="password" id="apiKey" required value="apex_secret_key_999" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-indigo-300 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <button type="submit" id="submitBtn" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition shadow-lg mt-2">
+                    Run Compliance & Risk Check
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column: Professional Compliance Report -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-semibold mb-4 text-indigo-400 border-b border-slate-700 pb-2">Assessment Report</h2>
+                
+                <!-- Initial State Placeholder -->
+                <div id="placeholder" class="text-center py-20 text-slate-500">
+                    <p class="text-sm">Submit vendor details from the form to generate a secure compliance report card.</p>
+                </div>
+
+                <!-- Result Card (Hidden by default) -->
+                <div id="resultCard" class="hidden space-y-4">
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Assessment ID</span>
+                        <div id="resId" class="text-sm font-mono text-indigo-300 font-semibold"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400 uppercase tracking-wider">Company Name</span>
+                            <div id="resCompany" class="text-sm font-semibold text-slate-200 mt-1"></div>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                            <span class="text-xs text-slate-400 uppercase tracking-wider">Risk Score</span>
+                            <div id="resRisk" class="text-lg font-bold text-emerald-400 mt-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Compliance Status</span>
+                        <div id="resStatus" class="text-base font-bold text-emerald-400 mt-1"></div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Timestamp</span>
+                        <div id="resTime" class="text-xs font-mono text-slate-400 mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-xs text-slate-500 text-center mt-6 pt-4 border-t border-slate-700">
+                Apex Compliance Engine &bull; Secured B2B Gateway
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Logic to Call FastAPI Backend -->
+    <script>
+        const form = document.getElementById('vendorForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const placeholder = document.getElementById('placeholder');
+        const resultCard = document.getElementById('resultCard');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Collect Form Data
+            const company_name = document.getElementById('company_name').value;
+            const gstin = document.getElementById('gstin').value;
+            const pan = document.getElementById('pan').value;
+            const contact_person = document.getElementById('contact_person').value;
+            const email = document.getElementById('email').value;
+            const apiKey = document.getElementById('apiKey').value;
+
+            // UI Loading state
+            submitBtn.textContent = "Verifying & Analyzing...";
+            submitBtn.disabled = true;
+
+            try {
+                // Apna live Render backend URL yahan daalna hai (jaise tera backend live hai)
+                const backendUrl = "https://apex-compliance-engine.onrender.com/api/v1/vendor/verify";
+
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'access-token': apiKey
+                    },
+                    body: JSON.stringify({
+                        company_name,
+                        gstin,
+                        pan,
+                        contact_person,
+                        email
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Populate results
+                    document.getElementById('resId').textContent = data.assessment_id;
+                    document.getElementById('resCompany').textContent = data.company_name;
+                    document.getElementById('resRisk').textContent = data.risk_score + " / 100";
+                    document.getElementById('resStatus').textContent = data.compliance_status;
+                    document.getElementById('resTime').textContent = data.timestamp;
+
+                    // Show Result Card, Hide Placeholder
+                    placeholder.classList.add('hidden');
+                    resultCard.classList.remove('hidden');
+                } else {
+                    alert("Verification Failed: " + (data.detail || "Invalid API Key or Data"));
+                }
+            } catch (err) {
+                alert("Network Error: Could not connect to the Apex compliance backend.");
+                console.error(err);
+            } finally {
+                submitBtn.textContent = "Run Compliance & Risk Check";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
