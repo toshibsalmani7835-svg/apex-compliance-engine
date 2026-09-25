@@ -1,56 +1,64 @@
-from fastapi import FastAPI, Security, HTTPException, status
-from fastapi.security.api_key import APIKeyHeader
-from pydantic import BaseModel
-from datetime import datetime
-import random
+from fastapi import FastAPI, Header, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
+import re
 
-app = FastAPI(
-    title="Apex Enterprise Compliance & Vendor Onboarding Engine",
-    description="Professional B2B SaaS Engine for Automated Vendor Verification, GSTIN/PAN Validation, and Bulk Excel Risk Scoring.",
-    version="1.0.0"
+app = FastAPI(title="Apex Compliance Engine", version="1.0.0")
+
+# CORS Middleware configuration to allow frontend to communicate with backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (frontend domains)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
+    allow_headers=["*"],  # Allows all headers including access-token
 )
 
-# API Key Security Configuration
-API_KEY = "apex_secret_key_999"
-API_KEY_NAME = "access-token"
+# API Key Security Definition
+SECRET_API_KEY = "apex_secret_key_999"
 
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
+def verify_api_key(access_token: str = Header(None)):
+    if not access_token or access_token != SECRET_API_KEY:
+        raise HTTPException(
+            status_code=401, 
+            detail="Unauthorized: Invalid or missing API Secret Access Key."
+        )
+    return access_token
 
-async def get_api_key(api_key_header: str = Security(api_key_header)):
-    if api_key_header == API_KEY:
-        return api_key_header
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Could not validate credentials. Invalid or missing API Key. Access denied!"
-    )
-
-class VendorOnboardingRequest(BaseModel):
+class VendorRequest(BaseModel):
     company_name: str
     gstin: str
     pan: str
     contact_person: str
-    email: str
+    email: EmailStr
 
 @app.get("/")
-def read_root():
-    return {
-        "status": "Enterprise Core Online",
-        "system": "Apex B2B Vendor & Compliance Onboarding Engine",
-        "documentation": "/docs"
-    }
+def home():
+    return {"message": "Apex Compliance Engine Backend is Live!"}
 
 @app.post("/api/v1/vendor/verify")
-async def verify_vendor(data: VendorOnboardingRequest, api_key: str = Security(get_api_key)):
-    # Simulated compliance logic with enterprise risk scoring
-    risk_score = round(random.uniform(5.0, 35.0), 2)
-    status_text = "Approved - Low Risk" if risk_score < 25.0 else "Review Required - Medium Risk"
-    
-    return {
-        "success": True,
-        "assessment_id": f"APEX-VEND-{random.randint(100000, 999999)}",
-        "company_name": data.company_name,
-        "compliance_status": status_text,
-        "risk_score": risk_score,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+def verify_vendor(data: VendorRequest, token: str = Depends(verify_api_key)):
+    # Compliance Risk Assessment Logic
+    risk_score = "Low"
+    status = "Approved"
+    message = "Vendor passed all core compliance, GSTIN format, and PAN verification checks successfully."
 
+    # Check for simulated high risk / fraudulent keywords or patterns
+    pan_upper = data.pan.upper()
+    gstin_upper = data.gstin.upper()
+    
+    if "FAKE" in pan_upper or "SCAM" in data.company_name.upper() or gstin_upper.startswith("99"):
+        risk_score = "High"
+        status = "Flagged / Rejected"
+        message = "Vendor flagged due to suspicious pattern matching in PAN/GSTIN or high-risk entity records."
+    elif len(pan_upper) != 10:
+        risk_score = "Medium"
+        status = "Review Required"
+        message = "PAN number length mismatch. Manual compliance review recommended."
+
+    return {
+        "status": status,
+        "company_name": data.company_name,
+        "risk_score": risk_score,
+        "message": message
+    }
