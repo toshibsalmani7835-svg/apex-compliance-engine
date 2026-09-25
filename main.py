@@ -1,11 +1,8 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-import pandas as pd
-import sqlite3
-import io
-import uuid
+from fastapi import FastAPI, Security, HTTPException, status
+from fastapi.security.api_key import APIKeyHeader
+from pydantic import BaseModel
 from datetime import datetime
+import random
 
 app = FastAPI(
     title="Apex Enterprise Compliance & Vendor Onboarding Engine",
@@ -13,35 +10,26 @@ app = FastAPI(
     version="1.0.0"
 )
 
-DB_FILE = "apex_enterprise.db"
+# API Key Security Configuration
+API_KEY = "apex_secret_key_999"
+API_KEY_NAME = "access-token"
 
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS vendors (
-            assessment_id TEXT PRIMARY KEY,
-            company_name TEXT,
-            gstin TEXT,
-            pan TEXT,
-            contact_person TEXT,
-            email TEXT,
-            compliance_status TEXT,
-            risk_score REAL,
-            timestamp TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
-init_db()
+async def get_api_key(api_key_header: str = Security(api_key_header)):
+    if api_key_header == API_KEY:
+        return api_key_header
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Could not validate credentials. Invalid or missing API Key. Access denied!"
+    )
 
 class VendorOnboardingRequest(BaseModel):
-    company_name: str = Field(..., min_length=2, description="Registered company name")
-    gstin: str = Field(..., min_length=15, max_length=15, description="15-character GSTIN")
-    pan: str = Field(..., min_length=10, max_length=10, description="10-character PAN")
-    contact_person: str = Field(..., description="Primary contact name")
-    email: str = Field(..., description="Corporate email")
+    company_name: str
+    gstin: str
+    pan: str
+    contact_person: str
+    email: str
 
 @app.get("/")
 def read_root():
@@ -52,34 +40,17 @@ def read_root():
     }
 
 @app.post("/api/v1/vendor/verify")
-def verify_single_vendor(vendor: VendorOnboardingRequest):
-    try:
-        assessment_id = f"APEX-VEND-{uuid.uuid4().hex[:8].upper()}"
-        risk_score = 12.5
-        compliance_status = "Approved - Low Risk"
-        
-        if "RISK" in vendor.company_name.upper() or "TEST" in vendor.company_name.upper():
-            risk_score = 78.0
-            compliance_status = "Flagged - Manual Review Required"
+async def verify_vendor(data: VendorOnboardingRequest, api_key: str = Security(get_api_key)):
+    # Simulated compliance logic with enterprise risk scoring
+    risk_score = round(random.uniform(5.0, 35.0), 2)
+    status_text = "Approved - Low Risk" if risk_score < 25.0 else "Review Required - Medium Risk"
+    
+    return {
+        "success": True,
+        "assessment_id": f"APEX-VEND-{random.randint(100000, 999999)}",
+        "company_name": data.company_name,
+        "compliance_status": status_text,
+        "risk_score": risk_score,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
-        timestamp = datetime.utcnow().isoformat()
-
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO vendors (assessment_id, company_name, gstin, pan, contact_person, email, compliance_status, risk_score, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (assessment_id, vendor.company_name, vendor.gstin.upper(), vendor.pan.upper(), vendor.contact_person, vendor.email, compliance_status, risk_score, timestamp))
-        conn.commit()
-        conn.close()
-
-        return {
-            "success": True,
-            "assessment_id": assessment_id,
-            "company_name": vendor.company_name,
-            "compliance_status": compliance_status,
-            "risk_score": risk_score,
-            "timestamp": timestamp
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
