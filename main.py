@@ -10,18 +10,17 @@ from pydantic import BaseModel, EmailStr, Field
 import uvicorn
 
 app = FastAPI(
-    title="Apex Enterprise Compliance & Risk Intelligence SaaS - Commercial Edition",
-    description="Production-Ready SaaS with User Auth, Razorpay Billing, SQLite Persistence, and Cryptographic Audit Engine.",
-    version="4.0.0"
+    title="Apex Enterprise Compliance & Risk Intelligence SaaS - Strict Auth Edition",
+    description="Production-Ready SaaS with Mandatory Login Lock, Database Persistence & Razorpay Billing.",
+    version="4.1.0"
 )
 
 # ==================== DATABASE SETUP ====================
-DB_FILE = "apex_saas_commercial.db"
+DB_FILE = "apex_saas_strict.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # Users Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ def init_db():
             created_at TEXT
         )
     ''')
-    # Audit Logs Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS audit_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +47,6 @@ def init_db():
             timestamp TEXT
         )
     ''')
-    # Transactions Table (Billing)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,8 +83,8 @@ class VendorPayload(BaseModel):
 
 class RazorpayOrderRequest(BaseModel):
     email: EmailStr
-    plan_name: str  # e.g., "Pro Enterprise", "Global Unlimited"
-    amount: float   # e.g., 4999.00
+    plan_name: str
+    amount: float
 
 # ==================== AUTH & CORE LOGIC ====================
 @app.post("/api/v4/auth/register")
@@ -99,7 +96,6 @@ def register_user(payload: UserRegister):
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="User with this email already registered.")
         
-        # Simple password hashing simulation for robust storage
         pwd_hash = hashlib.sha256(payload.password.encode()).hexdigest()
         timestamp = datetime.datetime.utcnow().isoformat()
         
@@ -136,7 +132,6 @@ def login_user(payload: UserLogin):
 
 @app.post("/api/v4/billing/create-order")
 def create_razorpay_order(payload: RazorpayOrderRequest):
-    # Simulated Razorpay Order Creation Endpoint
     order_id = f"order_apex_{os.urandom(4).hex()}"
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -237,7 +232,7 @@ def log_audit_to_db(user_email: str, payload: VendorPayload, assessment: dict):
         print(f"Database logging error: {e}")
 
 @app.post("/api/v4/enterprise/verify")
-def run_enterprise_verification(payload: VendorPayload, user_email: str = "demo_client@apex.com", bg_tasks: BackgroundTasks = None):
+def run_enterprise_verification(payload: VendorPayload, user_email: str = "secure_client@apex.com", bg_tasks: BackgroundTasks = None):
     assessment = execute_comprehensive_assessment(payload.gstin, payload.pan, payload.turnover_lakhs)
     if bg_tasks:
         bg_tasks.add_task(log_audit_to_db, user_email, payload, assessment)
@@ -246,7 +241,7 @@ def run_enterprise_verification(payload: VendorPayload, user_email: str = "demo_
     
     return {
         "status": "success",
-        "saas_version": "4.0.0 Commercial",
+        "saas_version": "4.1.0 Locked",
         "vendor_details": {
             "contact": payload.contact_person,
             "company": payload.company_name,
@@ -256,7 +251,7 @@ def run_enterprise_verification(payload: VendorPayload, user_email: str = "demo_
         "risk_intelligence_report": assessment
     }
 
-# ==================== FRONTEND UI (SAAS DASHBOARD & AUTH) ====================
+# ==================== FRONTEND UI (STRICT AUTH LOCKED) ====================
 @app.get("/", response_class=HTMLResponse)
 def commercial_saas_dashboard():
     return """<!DOCTYPE html>
@@ -294,7 +289,8 @@ def commercial_saas_dashboard():
         .logo-area { display: flex; align-items: center; gap: 12px; }
         .badge { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 14px; }
         .system-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #9ca3af; background: #1f2937; padding: 6px 14px; border-radius: 20px; width: fit-content; }
-        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+        .status-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; }
+        .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
         
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
         .tab-btn { background: #1f2937; color: #9ca3af; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 600; }
@@ -326,6 +322,7 @@ def commercial_saas_dashboard():
         .section-view { display: none; }
         .section-view.active { display: block; }
         .pricing-box { background: #0b0f19; border: 1px solid #374151; border-radius: 12px; padding: 20px; text-align: center; margin-top: 15px; }
+        .lock-notice { background: #1f2937; border: 1px dashed #4b5563; padding: 30px; text-align: center; border-radius: 12px; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -333,85 +330,26 @@ def commercial_saas_dashboard():
         <div class="container">
             <div class="header">
                 <div class="logo-area">
-                    <div class="badge">APEX v4.0</div>
+                    <div class="badge">APEX v4.1</div>
                     <div>
                         <h1>Enterprise SaaS</h1>
-                        <p class="subtitle">Multi-Tenant Compliance, Auth & Razorpay Billing</p>
+                        <p class="subtitle">Strict Authentication & Secured Compliance Grid</p>
                     </div>
                 </div>
                 <div class="system-status">
-                    <div class="status-dot"></div>
-                    <span id="userSessionStatus">Commercial Mode Active</span>
+                    <div id="statusDot" class="status-dot"></div>
+                    <span id="userSessionStatus">Authentication Required</span>
                 </div>
             </div>
 
             <div class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('auditTab')">Risk Dashboard</button>
-                <button class="tab-btn" onclick="switchTab('authTab')">Client Login / Register</button>
-                <button class="tab-btn" onclick="switchTab('billingTab')">Razorpay Pricing</button>
+                <button id="btnAuthTab" class="tab-btn active" onclick="switchTab('authTab')">Client Login / Register</button>
+                <button id="btnAuditTab" class="tab-btn" onclick="switchTab('auditTab')">Risk Dashboard</button>
+                <button id="btnBillingTab" class="tab-btn" onclick="switchTab('billingTab')">Razorpay Pricing</button>
             </div>
 
-            <!-- AUDIT ENGINE TAB -->
-            <div id="auditTab" class="section-view active">
-                <form id="complianceForm">
-                    <div class="form-grid">
-                        <div>
-                            <label>Contact Person</label>
-                            <input type="text" id="contact_person" placeholder="e.g. Rahul Sharma" required>
-                        </div>
-                        <div>
-                            <label>Email Address</label>
-                            <input type="email" id="email" placeholder="e.g. rahul@company.com" required>
-                        </div>
-                        <div class="full-width">
-                            <label>Company Name</label>
-                            <input type="text" id="company_name" placeholder="e.g. Apex Global Industries Ltd" required>
-                        </div>
-                        <div>
-                            <label>GSTIN Number (15 Digits)</label>
-                            <input type="text" id="gstin" placeholder="e.g. 07ABCDE1234F1Z5" required>
-                        </div>
-                        <div>
-                            <label>PAN Number (10 Digits)</label>
-                            <input type="text" id="pan" placeholder="e.g. ABCDE1234F" required>
-                        </div>
-                        <div class="full-width">
-                            <label>Annual Turnover (Lakhs INR)</label>
-                            <input type="number" id="turnover_lakhs" placeholder="e.g. 250" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary">Execute Commercial 5-Layer Risk Audit</button>
-                </form>
-
-                <div id="reportCard" class="report-card">
-                    <div class="report-header">
-                        <span>Certified Assessment Report</span>
-                        <span id="riskTierBadge" class="status-approved">Low Risk</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Target Enterprise</span>
-                        <span id="repCompanyName" class="metric-value">-</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Governance Status</span>
-                        <span id="repStatus" class="metric-value">-</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Advanced Risk Score</span>
-                        <span id="repScore" class="metric-value">-</span>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <label>Regulatory Audit Trail & Flags</label>
-                        <ul id="repFlags" class="flags-list"></ul>
-                    </div>
-                    <div class="audit-hash" id="repHash">
-                        Cryptographic Audit Hash (SHA-256): -
-                    </div>
-                </div>
-            </div>
-
-            <!-- AUTH TAB -->
-            <div id="authTab" class="section-view">
+            <!-- AUTH TAB (DEFAULT OPEN) -->
+            <div id="authTab" class="section-view active">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                     <div>
                         <h3 style="font-size:15px; margin-bottom:12px; color:#fff;">Client Register</h3>
@@ -429,6 +367,71 @@ def commercial_saas_dashboard():
                             <div style="margin-bottom:12px;"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
                             <button type="submit" class="btn-primary">Secure Login</button>
                         </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIT ENGINE TAB (LOCKED UNTIL LOGIN) -->
+            <div id="auditTab" class="section-view">
+                <div id="dashboardLocked" class="lock-notice">
+                    <h3 style="color:#ef4444; margin-bottom:8px;">Access Restricted</h3>
+                    <p>You must log in to your commercial client account to access the Enterprise Risk Dashboard.</p>
+                </div>
+                <div id="dashboardUnlocked" style="display:none;">
+                    <form id="complianceForm">
+                        <div class="form-grid">
+                            <div>
+                                <label>Contact Person</label>
+                                <input type="text" id="contact_person" placeholder="e.g. Rahul Sharma" required>
+                            </div>
+                            <div>
+                                <label>Email Address</label>
+                                <input type="email" id="email" placeholder="e.g. rahul@company.com" required>
+                            </div>
+                            <div class="full-width">
+                                <label>Company Name</label>
+                                <input type="text" id="company_name" placeholder="e.g. Apex Global Industries Ltd" required>
+                            </div>
+                            <div>
+                                <label>GSTIN Number (15 Digits)</label>
+                                <input type="text" id="gstin" placeholder="e.g. 07ABCDE1234F1Z5" required>
+                            </div>
+                            <div>
+                                <label>PAN Number (10 Digits)</label>
+                                <input type="text" id="pan" placeholder="e.g. ABCDE1234F" required>
+                            </div>
+                            <div class="full-width">
+                                <label>Annual Turnover (Lakhs INR)</label>
+                                <input type="number" id="turnover_lakhs" placeholder="e.g. 250" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Execute Commercial 5-Layer Risk Audit</button>
+                    </form>
+
+                    <div id="reportCard" class="report-card">
+                        <div class="report-header">
+                            <span>Certified Assessment Report</span>
+                            <span id="riskTierBadge" class="status-approved">Low Risk</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Target Enterprise</span>
+                            <span id="repCompanyName" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Governance Status</span>
+                            <span id="repStatus" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Advanced Risk Score</span>
+                            <span id="repScore" class="metric-value">-</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <label>Regulatory Audit Trail & Flags</label>
+                            <ul id="repFlags" class="flags-list"></ul>
+                        </div>
+                        <div class="audit-hash" id="repHash">
+                            Cryptographic Audit Hash (SHA-256): -
+                        </div>
                     </div>
                 </div>
             </div>
@@ -454,16 +457,75 @@ def commercial_saas_dashboard():
         </div>
     </div>
     <script>
+        let isLoggedIn = false;
+
         function switchTab(tabId) {
+            if(tabId === 'auditTab' && !isLoggedIn) {
+                alert('Please login first to access the Risk Dashboard.');
+                return;
+            }
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
         }
 
+        // Register Handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const payload = {
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                company_name: document.getElementById('regCompany').value
+            };
+            const res = await fetch('/api/v4/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            alert(data.message || data.detail);
+        });
+
+        // Login Handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const payload = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+            const res = await fetch('/api/v4/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+                isLoggedIn = true;
+                document.getElementById('userSessionStatus').textContent = `Logged in: ${data.user_data.company_name}`;
+                document.getElementById('statusDot').classList.add('active');
+                document.getElementById('dashboardLocked').style.display = 'none';
+                document.getElementById('dashboardUnlocked').style.display = 'block';
+                
+                alert('Login Successful! Redirecting to Risk Dashboard.');
+                
+                // Automatically switch to audit tab
+                document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById('auditTab').classList.add('active');
+                document.getElementById('btnAuditTab').classList.add('active');
+            } else {
+                alert(data.detail);
+            }
+        });
+
         // Compliance Engine Handler
         document.getElementById('complianceForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if(!isLoggedIn) {
+                alert('Session expired. Please login again.');
+                return;
+            }
             const payload = {
                 contact_person: document.getElementById('contact_person').value,
                 email: document.getElementById('email').value,
@@ -507,46 +569,6 @@ def commercial_saas_dashboard():
             }
         });
 
-        // Register Handler
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const payload = {
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value,
-                company_name: document.getElementById('regCompany').value
-            };
-            const res = await fetch('/api/v4/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            alert(data.message || data.detail);
-        });
-
-        // Login Handler
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const payload = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-            const res = await fetch('/api/v4/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if(data.status === 'success') {
-                document.getElementById('userSessionStatus').textContent = `Logged in: ${data.user_data.company_name} (${data.user_data.subscription_tier})`;
-                alert('Login Successful!');
-                switchTab('auditTab');
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            } else {
-                alert(data.detail);
-            }
-        });
-
         // Razorpay Trigger Handler
         async function triggerRazorpay(planName, amount) {
             const email = prompt("Enter your registered account email for subscription invoice:", "client@apex.com");
@@ -558,7 +580,7 @@ def commercial_saas_dashboard():
             });
             const data = await res.json();
             if(data.status === 'success') {
-                alert(`Razorpay Gateway Simulated Successfully!\\nOrder ID: ${data.order_id}\\nPlan: ${planName}\\nAmount: ₹${amount}\\n(Note: In live production, the official Razorpay Checkout SDK popup opens here).`);
+                alert(`Razorpay Gateway Simulated Successfully!\\nOrder ID: ${data.order_id}\\nPlan: ${planName}\\nAmount: ₹${amount}`);
             }
         }
     </script>
